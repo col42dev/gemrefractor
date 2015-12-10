@@ -5,9 +5,11 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var transactions = require('./routes/transactions');
+
 
 var app = express();
 
@@ -28,16 +30,7 @@ app.use('/', routes);
 app.use('/users', users);
 app.use('/transactions', transactions);
 
-// POST http://localhost:3000/
-app.post('/', function(req, res) {
-    var message = req.body.message;
 
-    message.split('\n').forEach( function( aMessage) {
-      console.log('POST message received: ' + aMessage);
-    });
-
-    res.send('POST message received: ' + message);
-});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
