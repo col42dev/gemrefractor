@@ -28,16 +28,15 @@ app.use('/', routes);
 app.use('/users', users);
 app.use('/transactions', transactions);
 
-// POST http://localhost:8080/api/users
-// parameters sent with 
-app.post('/api/users', function(req, res) {
-    var user_id = req.body.id;
-    var token = req.body.token;
-    var geo = req.body.geo;
+// POST http://localhost:3000/
+app.post('/', function(req, res) {
+    var message = req.body.message;
 
-    console.log('respond with a resource: ' + user_id + ' ' + token + ' ' + geo);
+    message.split('\n').forEach( function( aMessage) {
+      console.log('POST message received: ' + aMessage);
+    });
 
-    res.send('respond with a resource: ' + user_id + ' ' + token + ' ' + geo);
+    res.send('POST message received: ' + message);
 });
 
 // catch 404 and forward to error handler
