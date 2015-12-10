@@ -30,4 +30,6 @@ $ DEBUG=gemrefractor:* npm start
 
 Use [postman](http://www.getpostman.com/) to test POST requests.
 
+![postman](https://raw.githubusercontent.com/col42dev/gemrefractor/master/documentation/postman.png)
+
 
