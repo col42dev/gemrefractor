@@ -4,5 +4,20 @@
 node_modules
 
 
+gemologist/Library
+gemologist/Temp
+
+gemologist/*.csproj
+gemologist/*.sln
+gemologist/*.userprefs
+
+# Mac App
+gemologist/*.app
+
+# linux App
+gemologist/gemologist_Data
+gemologist/*.x86
+gemologist/*.x86_64
+
 # misc
 npm-debug.log
