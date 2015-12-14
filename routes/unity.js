@@ -66,15 +66,15 @@ router.post('/', function(req, res) {
 		}
 
 
-		var match = aMessage.match(/^transaction:(.*)/);
+		var match = aMessage.match(/^transactions:(.*)/);
 		if  (match) {
 
-			var transaction = match[1];
+			var transactions = match[1];
 
-			console.log('refractor transaction:' + transaction);
-			sendMessage += 'refractor transaction:' + transaction;
+			console.log('refractor transactions:' + transactions);
+			sendMessage += 'refractor transactions:' + transactions;
 
-			postTransaction(transaction);
+			postTransaction(transactions);
 
 		}
 		res.send(sendMessage);
@@ -85,10 +85,10 @@ router.post('/', function(req, res) {
 });
 
 
-function postTransaction( rawtransaction) {
+function postTransaction( rawtransactions) {
 
 
-  var transaction = '{"transaction":'+rawtransaction+'}';
+  var transactions = '{"transactions":'+rawtransactions+'}';
 
  var post_options = {
       //host: 'api.myjson.com',
@@ -102,12 +102,12 @@ function postTransaction( rawtransaction) {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json; charset=utf-8',
-          'Content-Length': Buffer.byteLength(transaction)
+          'Content-Length': Buffer.byteLength(transactions)
       }
   };
 
 
-console.log('transaction:' + transaction);
+console.log('transactions:' + transactions);
 
 var post_req = http.request(post_options, function(res) {
 
@@ -143,7 +143,7 @@ var post_req = http.request(post_options, function(res) {
     console.log('post_req error:' + e);
   });
 
-  post_req.write(transaction);
+  post_req.write(transactions);
   post_req.end();
 
 

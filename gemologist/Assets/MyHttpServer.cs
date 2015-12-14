@@ -74,50 +74,56 @@ public class MyHttpServer : MonoBehaviour {
 
 		}
 
-		private string ParseTransaction(string transaction)
+		private string ParseTransaction(string transactions)
 		{
-			string thisSendMessage = "gemologist parse transaction";
+			string thisSendMessage = "gemologist parse transactions";
 
-			JSONNode jsontransaction = JSONNode.Parse ( transaction);
-			transaction = (string)jsontransaction ["transaction"];
+			JSONNode jsontransaction = JSONNode.Parse ( transactions);
+			transactions = (string)jsontransaction ["transactions"];
 
-			Debug.Log ("transaction value:" + transaction);
+			Debug.Log ("transactions value:" + transactions);
 
-			Match m = Regex.Match( (string)jsontransaction["transaction"], @"(buy|sell) (\d+) (\S+)");
-			if (m.Success) {
-				Debug.Log ("Match Success");
-				thisSendMessage += "Match Success";
+			Regex regex = new Regex ("<br/>");
+			string[] transactionsArray = regex.Split((string)jsontransaction["transactions"]);
+
+			foreach (string transaction in transactionsArray) {
+				thisSendMessage += "transaction:" + transaction;
+				Match m = Regex.Match (transaction, @"(buy|sell) (\d+) (\S+)");
+				if (m.Success) {
+					Debug.Log ("Match Success");
+					thisSendMessage += "Match Success";
 		
-				string resourceName = m.Groups [3].ToString ();
-				int transactionQuantity = int.Parse (m.Groups [2].ToString ());
-				string transactionType = m.Groups [1].ToString ();
+					string resourceName = m.Groups [3].ToString ();
+					int transactionQuantity = int.Parse (m.Groups [2].ToString ());
+					string transactionType = m.Groups [1].ToString ();
 	
-				Debug.Log (resourceName + "," + transactionQuantity + "," + transactionType);
+					Debug.Log (resourceName + "," + transactionQuantity + "," + transactionType);
 
-				int newQuantity = SampleState.Instance.mState["resources"][resourceName]["quantity"].AsInt;
-				switch (transactionType) {
+					int newQuantity = SampleState.Instance.mState ["resources"] [resourceName] ["quantity"].AsInt;
+					switch (transactionType) {
 					case "buy":
 						newQuantity += transactionQuantity;
 						break;
 					case "sell":
 						newQuantity -= transactionQuantity;
 						break;
-				}  
+					}  
 
-				if (newQuantity <0) {
-					thisSendMessage += "Negative quantity transaction detected:" + resourceName +"\n";
-				} else {
-					SampleState.Instance.mState["resources"][resourceName]["quantity"] = new JSONData( newQuantity);
-				}
+					if (newQuantity < 0) {
+						thisSendMessage += "Negative quantity transaction detected:" + resourceName + "\n";
+					} else {
+						SampleState.Instance.mState ["resources"] [resourceName] ["quantity"] = new JSONData (newQuantity);
+					}
 
-				if ( SampleState.Instance.mState["gold"]["quantity"].AsInt - SampleState.Instance.mState["resources"][resourceName]["cost"].AsInt * transactionQuantity < 0) {
-					thisSendMessage += "Negative gold transaction detected\n";
+					if (SampleState.Instance.mState ["gold"] ["quantity"].AsInt - SampleState.Instance.mState ["resources"] [resourceName] ["cost"].AsInt * transactionQuantity < 0) {
+						thisSendMessage += "Negative gold transaction detected\n";
+					} else {
+						int value = SampleState.Instance.mState ["gold"] ["quantity"].AsInt - SampleState.Instance.mState ["resources"] [resourceName] ["cost"].AsInt * transactionQuantity;
+						SampleState.Instance.mState ["gold"] ["quantity"] = new JSONData (value);
+					}
 				} else {
-					int value = SampleState.Instance.mState["gold"]["quantity"].AsInt - SampleState.Instance.mState["resources"][resourceName]["cost"].AsInt * transactionQuantity;
-					SampleState.Instance.mState["gold"]["quantity"] = new JSONData( value);
+					Debug.Log ("Match Failed: " + transaction);
 				}
-			} else {
-				Debug.Log ("Match Failed: " + transaction);
 			}
 			return thisSendMessage;
 		}
