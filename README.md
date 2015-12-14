@@ -1,8 +1,8 @@
 # gemrefractor
 
-gemrefractor is a server app for the gemengine client. It receives and validates transaction requests from the client.
+gemrefractor is a server app for the [gemminer](https://github.com/col42dev/gemminer) client. It receives  transaction requests from the client and forwards them on to a headless Unity instance for verification. 
 
-## application setup
+## setup
 
 gemrefactor is an expressjs application.
 
@@ -16,6 +16,7 @@ install body-parser and update package.json
 $ npm install body-parser --save
 </pre>
 
+## install 
 <pre>
 $ npm install
 </pre>
