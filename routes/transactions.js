@@ -13,7 +13,7 @@ router.get('/', function(req, res, next) {
 });
 
 // POST http://localhost:3000/
-router.post('/', function(req, res) {
+router.post('/batch', function(req, res) {
 
     var message = req.body.message;
    	var sendMessage = 'POST message received:<br/>';

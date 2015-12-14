@@ -41,31 +41,52 @@ public class MyHttpServer : MonoBehaviour {
 		public override void handlePOSTRequest(Bend.Util.HttpProcessor p, StreamReader inputData) {
 			string data = inputData.ReadToEnd();
 
-			Debug.Log("POST request: " + p.http_url + ", POST data: " + data);
 
+			p.outputStream.WriteLine("<html><body><h1>test server</h1>");
+			p.outputStream.WriteLine("<a href=/test>return</a><p>");
+			p.outputStream.WriteLine("postbody: <pre>{0}</pre>", data);
 			mPostLog.Add (data);
 
-			using (StringReader sr = new StringReader(data)) {
-				string line;
-				while ((line = sr.ReadLine()) != null) {
-					p.outputStream.WriteLine(line);
 
-					string parseResult = ParseTransaction(line);
-					Debug.Log(parseResult);
-					mPostLog.Add (parseResult);
-					p.outputStream.WriteLine(parseResult);
+			if (data != null && data.Length > 0) {
+				Debug.Log("POST request: " + p.http_url + ", POST data: " + data);
+				
+
+				mPostLog.Add (data);
+				
+				p.outputStream.WriteLine ("handlePOSTRequest:");
+
+				using (StringReader sr = new StringReader(data)) {
+					string line;
+					while ((line = sr.ReadLine()) != null) {
+						p.outputStream.WriteLine (line);
+
+						string parseResult = ParseTransaction (line);
+						Debug.Log (parseResult);
+						mPostLog.Add (parseResult);
+						p.outputStream.WriteLine (parseResult);
+					}
 				}
-			
+			} else {
+				Debug.Log("null data received");
+				p.outputStream.WriteLine ("null data received");
 			}
 
 		}
 
 		private string ParseTransaction(string transaction)
 		{
-			string thisSendMessage = "";
-			Match m = Regex.Match( transaction, @"(buy|sell) (\d+) (\S+)");
+			string thisSendMessage = "gemologist parse transaction";
+
+			JSONNode jsontransaction = JSONNode.Parse ( transaction);
+			transaction = (string)jsontransaction ["transaction"];
+
+			Debug.Log ("transaction value:" + transaction);
+
+			Match m = Regex.Match( (string)jsontransaction["transaction"], @"(buy|sell) (\d+) (\S+)");
 			if (m.Success) {
 				Debug.Log ("Match Success");
+				thisSendMessage += "Match Success";
 		
 				string resourceName = m.Groups [3].ToString ();
 				int transactionQuantity = int.Parse (m.Groups [2].ToString ());
@@ -108,7 +129,9 @@ public class MyHttpServer : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		mSimpleHttpServer = new SimpleHttpServer (8080);
+
+		Debug.Log ("MyHttpServer::Start ");
+		mSimpleHttpServer = new SimpleHttpServer (4000);
 
 		mThread = new Thread(new ThreadStart(mSimpleHttpServer.listen));
 		mThread.Start();
