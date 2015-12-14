@@ -29,10 +29,10 @@ public class MyHttpServer : MonoBehaviour {
 			p.outputStream.WriteLine("</form>");*/
 
 			p.writeSuccess();
-			p.outputStream.WriteLine("<html><body><h1>POST Log output</h1>");
+			p.outputStream.WriteLine("<html><body><h1>gemologist - unity server log output</h1>");
 			p.outputStream.WriteLine("<pre>");
 			foreach (string log in mPostLog) {
-				p.outputStream.WriteLine (log);
+				p.outputStream.WriteLine (log + "\n");
 			}
 			p.outputStream.WriteLine("</pre>");
 			mPostLog.Clear();
@@ -45,7 +45,6 @@ public class MyHttpServer : MonoBehaviour {
 			p.outputStream.WriteLine("<html><body><h1>test server</h1>");
 			p.outputStream.WriteLine("<a href=/test>return</a><p>");
 			p.outputStream.WriteLine("postbody: <pre>{0}</pre>", data);
-			mPostLog.Add (data);
 
 
 			if (data != null && data.Length > 0) {
@@ -61,43 +60,45 @@ public class MyHttpServer : MonoBehaviour {
 					while ((line = sr.ReadLine()) != null) {
 						p.outputStream.WriteLine (line);
 
-						string parseResult = ParseTransaction (line);
-						Debug.Log (parseResult);
-						mPostLog.Add (parseResult);
-						p.outputStream.WriteLine (parseResult);
+						ParseTransactions (line);
 					}
 				}
 			} else {
+				mPostLog.Add ("null data received.");
 				Debug.Log("null data received");
 				p.outputStream.WriteLine ("null data received");
 			}
 
 		}
 
-		private string ParseTransaction(string transactions)
+		private void ParseTransactions(string transactions)
 		{
-			string thisSendMessage = "gemologist parse transactions";
+			mPostLog.Add ("gemologist parse transactions.");
 
 			JSONNode jsontransaction = JSONNode.Parse ( transactions);
 			transactions = (string)jsontransaction ["transactions"];
 
 			Debug.Log ("transactions value:" + transactions);
+			mPostLog.Add ("transactions value:" + transactions);
+
 
 			Regex regex = new Regex ("<br/>");
-			string[] transactionsArray = regex.Split((string)jsontransaction["transactions"]);
+			string[] transactionsArray = regex.Split(transactions);
 
 			foreach (string transaction in transactionsArray) {
-				thisSendMessage += "transaction:" + transaction;
-				Match m = Regex.Match (transaction, @"(buy|sell) (\d+) (\S+)");
+				mPostLog.Add ("transaction:" + transaction);
+
+				Match m = Regex.Match (transaction, @"(buy|sell)(\d+)(\S+)");
 				if (m.Success) {
-					Debug.Log ("Match Success");
-					thisSendMessage += "Match Success";
+					Debug.Log ("Match Success.");
+					mPostLog.Add ("Match Success.");
 		
 					string resourceName = m.Groups [3].ToString ();
 					int transactionQuantity = int.Parse (m.Groups [2].ToString ());
 					string transactionType = m.Groups [1].ToString ();
 	
 					Debug.Log (resourceName + "," + transactionQuantity + "," + transactionType);
+					mPostLog.Add (resourceName + "," + transactionQuantity + "," + transactionType);
 
 					int newQuantity = SampleState.Instance.mState ["resources"] [resourceName] ["quantity"].AsInt;
 					switch (transactionType) {
@@ -110,22 +111,24 @@ public class MyHttpServer : MonoBehaviour {
 					}  
 
 					if (newQuantity < 0) {
-						thisSendMessage += "Negative quantity transaction detected:" + resourceName + "\n";
+						mPostLog.Add ("Negative quantity transaction detected:" + resourceName);
 					} else {
 						SampleState.Instance.mState ["resources"] [resourceName] ["quantity"] = new JSONData (newQuantity);
 					}
 
 					if (SampleState.Instance.mState ["gold"] ["quantity"].AsInt - SampleState.Instance.mState ["resources"] [resourceName] ["cost"].AsInt * transactionQuantity < 0) {
-						thisSendMessage += "Negative gold transaction detected\n";
+						mPostLog.Add ("Negative gold transaction detected:" + resourceName);
+
 					} else {
 						int value = SampleState.Instance.mState ["gold"] ["quantity"].AsInt - SampleState.Instance.mState ["resources"] [resourceName] ["cost"].AsInt * transactionQuantity;
 						SampleState.Instance.mState ["gold"] ["quantity"] = new JSONData (value);
 					}
 				} else {
 					Debug.Log ("Match Failed: " + transaction);
+					mPostLog.Add ("Match Failed: " + transaction);
 				}
 			}
-			return thisSendMessage;
+			return;
 		}
 
 	}
@@ -136,7 +139,7 @@ public class MyHttpServer : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
-		Debug.Log ("MyHttpServer::Start ");
+		Debug.Log ("MyHttpServer::Start on port 4000");
 		mSimpleHttpServer = new SimpleHttpServer (4000);
 
 		mThread = new Thread(new ThreadStart(mSimpleHttpServer.listen));
